@@ -4,6 +4,7 @@ from const.global_const import *
 from dao.minio import MinioProxyClient
 from logic.preprocessing import Preprocessor
 from logic.plot import plot_roc_train, plot_roc_test, plot_dca
+from logic.calculate_metrics import calculate_metrics
 from model.model import *
 
 if __name__ == "__main__":
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     step 3: 开始训练模型
     """
     lr_model = LinearRegressionHelper(max_iter=200)
-    svm_model = SVMHelper()
+    svm_model = SVMHelper(kernel="linear", gamma="scale")
     print("[INFO] Starting lr model training...")
     try:
         # Train the logistic regression model
@@ -79,32 +80,87 @@ if __name__ == "__main__":
         sys.exit(1)
     
     """
-    step 5: 画图
+    step 5: 画图(LR model)
     """
-    print("[INFO] Starting to plot train ROC...")
+    print("[INFO] Starting to plot LR model train ROC...")
     try:
         train_probs = lr_model.predict_proba(X_train)
-        plot_roc_train(y_train, train_probs)
+        plot_roc_train(y_train, train_probs, title="ROC Curve for LR model\n(train)", file_path="output/roc_train_lr.png")
         print("[INFO] Train ROC plot completed successfully.")
     except Exception as e:
         print("[ERROR] Train ROC plot failed: {}".format(e))
         sys.exit(1)
     
-    print("[INFO] Starting to plot test ROC...")
+    print("[INFO] Starting to plot LR model test ROC...")
     try:
         test_probs = lr_model.predict_proba(X_test)
-        plot_roc_test(y_test, test_probs)
+        plot_roc_test(y_test, test_probs, title="ROC Curve for LR model\n(test)", file_path="output/roc_test_lr.png")
         print("[INFO] Test ROC plot completed successfully.")
     except Exception as e:
         print("[ERROR] Test ROC plot failed: {}".format(e))
         sys.exit(1)
     
-    print("[INFO] Starting to draw DCA...")
+    print("[INFO] Starting to draw LR model DCA...")
     try:
-        plot_dca(y_test, test_probs)
+        plot_dca(y_test, test_probs, title="DCA Plot for LR model", file_path="output/dca_plot_lr.png")
         print("[INFO] DCA plot completed successfully.")
     except Exception as e:
         print("[ERROR] DCA plot failed: {}".format(e))
+        sys.exit(1)
+    
+    """
+    step 6: 保存模型评估结果到 Excel
+    """
+    print("[INFO] Starting to save LR model evaluation metrics to Excel...")
+    try:
+        lr_train_metrics = calculate_metrics(y_train, train_probs, lr_model.predict(X_train), dataset_type="train")
+        lr_test_metrics = calculate_metrics(y_test, test_probs, lr_model.predict(X_test), dataset_type="test")
+        util.save_metrics_to_excel(metrics=[lr_train_metrics, lr_test_metrics], filepath="output/result/metrics_summary_lr.xlsx")
+        print("[INFO] LR model evaluation metrics saved successfully.")
+    except Exception as e:
+        print("[ERROR] Saving LR model evaluation metrics failed: {}".format(e))
+        sys.exit(1)
+
+    """
+    step 7: 画图(SVM model)
+    """
+    print("[INFO] Starting to plot SVM model train ROC...")
+    try:
+        train_probs_svm = svm_model.predict_proba(X_train)
+        plot_roc_train(y_train, train_probs_svm, title="ROC Curve for SVM model\n(train)", file_path="output/roc_train_svm.png")
+        print("[INFO] Train ROC plot for SVM completed successfully.")
+    except Exception as e:
+        print("[ERROR] Train ROC plot for SVM failed: {}".format(e))
+        sys.exit(1)
+    
+    print("[INFO] Starting to plot SVM model test ROC...")
+    try:
+        test_probs_svm = svm_model.predict_proba(X_test)
+        plot_roc_test(y_test, test_probs_svm, title="ROC Curve for SVM model\n(test)", file_path="output/roc_test_svm.png")
+        print("[INFO] Test ROC plot for SVM completed successfully.")
+    except Exception as e:
+        print("[ERROR] Test ROC plot for SVM failed: {}".format(e))
+        sys.exit(1)
+    
+    print("[INFO] Starting to draw SVM model DCA...")
+    try:
+        plot_dca(y_test, test_probs_svm, title="DCA Plot for SVM model", file_path="output/dca_plot_svm.png")
+        print("[INFO] DCA plot for SVM completed successfully.")
+    except Exception as e:
+        print("[ERROR] DCA plot for SVM failed: {}".format(e))
+        sys.exit(1)
+    
+    """
+    step 8: 保存模型评估结果到 Excel
+    """
+    print("[INFO] Starting to save SVM model evaluation metrics to Excel...")
+    try:
+        svm_train_metrics = calculate_metrics(y_train, train_probs_svm, svm_model.predict(X_train), dataset_type="train")
+        svm_test_metrics = calculate_metrics(y_test, test_probs_svm, svm_model.predict(X_test), dataset_type="test")
+        util.save_metrics_to_excel(metrics=[svm_train_metrics, svm_test_metrics], filepath="output/result/metrics_summary_svm.xlsx")
+        print("[INFO] SVM model evaluation metrics saved successfully.")
+    except Exception as e:
+        print("[ERROR] Saving SVM model evaluation metrics failed: {}".format(e))
         sys.exit(1)
     
     print("[INFO] All steps completed successfully!")

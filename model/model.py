@@ -24,7 +24,7 @@ class LinearRegressionHelper:
         :return: Predicted labels
         """
         predictions = self.model.predict(X_test)
-        print("[INFO] Predictions made successfully, returning results.")
+        print("[INFO] LR Model Predictions made successfully, returning results.")
         return predictions
     
     def predict_proba(self, X):
@@ -43,7 +43,7 @@ class LinearRegressionHelper:
         :return: Accuracy of the model on the test data
         """
         accuracy = self.model.score(X_test, y_test)
-        print("[INFO] Model evaluation completed with accuracy: {:.2f}%".format(accuracy * 100))
+        print("[INFO] LR Model evaluation completed with accuracy: {:.2f}%".format(accuracy * 100))
         return accuracy
     
 class SVMHelper:

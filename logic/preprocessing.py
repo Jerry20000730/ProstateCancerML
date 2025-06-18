@@ -50,10 +50,8 @@ class Preprocessor:
         self.df.drop(columns=["病理"], inplace=True)
         self.x = self.df.copy()
 
-        print(self.x)
-        print(self.y)
         # generate the features using test_and_split
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.x, self.y, test_size=0.25, random_state=42, stratify=self.y)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.x, self.y, test_size=0.25, random_state=40, stratify=self.y)
 
         return self.X_train, self.X_test, self.y_train, self.y_test
 
